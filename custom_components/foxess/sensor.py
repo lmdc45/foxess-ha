@@ -949,8 +949,12 @@ async def getReport(hass, allData, apiKey, devicesn):
     path = _ENDPOINT_OA_DOMAIN + _ENDPOINT_OA_REPORT
     _LOGGER.debug("OA Report fetch %s ", path)
 
-    now = datetime.now()
-    month = str(datetime.now().month)  # now.strftime("%-m")
+    # Use UTC time since FoxESS Cloud aggregates daily report data on UTC day boundaries,
+    # not the station's configured timezone. Using local time causes a mismatch where
+    # the day index points to a day that hasn't started in the API yet (between local
+    # midnight and UTC midnight), resulting in stale/incorrect values.
+    now = datetime.utcnow()
+    month = str(now.month)
 
     reportData = (
         '{"sn":"'
